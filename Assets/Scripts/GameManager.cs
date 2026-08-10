@@ -1,8 +1,16 @@
+using System;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance {get;private set;}
+
+    public event EventHandler<OnClickOnGridPositionEventArgs> OnClickedOnGridPosition;
+    public class OnClickOnGridPositionEventArgs: EventArgs
+    {
+        public int x;
+        public int y;
+    }
 
     private void Awake()
     {
@@ -14,6 +22,7 @@ public class GameManager : MonoBehaviour
     }
     public void ClickedOnGridPosition(int x, int y) 
     {
-        Debug.Log($"Clicked On Grid Position {x},{y}");    
+        Debug.Log($"Clicked On Grid Position {x},{y}");
+        OnClickedOnGridPosition?.Invoke(this,new OnClickOnGridPositionEventArgs{x=x,y=y});    
     }
 }
