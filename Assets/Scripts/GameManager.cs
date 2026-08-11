@@ -6,6 +6,8 @@ public class GameManager : NetworkBehaviour
 {
     public static GameManager Instance {get;private set;}
 
+    public event EventHandler OnGameStarted;
+    public event EventHandler OnCurrentPlayablePlayerTypeChange;
     public event EventHandler<OnClickOnGridPositionEventArgs> OnClickedOnGridPosition;
     public class OnClickOnGridPositionEventArgs: EventArgs
     {
@@ -37,8 +39,17 @@ public class GameManager : NetworkBehaviour
         
         if (IsServer)
         {
-            currentPlayablePlayerType = PlayerType.Cross;
+            NetworkManager.Singleton.OnClientConnectedCallback+= NetworkManager_OnClientConnectCallback;
         }
+    }
+
+    private void NetworkManager_OnClientConnectCallback(ulong obj) 
+    {
+        if(NetworkManager.Singleton.ConnectedClientsList.Count ==2)
+        {
+            currentPlayablePlayerType = PlayerType.Cross;
+            TriggerOnGameStartedRpc();
+        }    
     }
 
     private void Awake()
@@ -48,6 +59,12 @@ public class GameManager : NetworkBehaviour
             Debug.LogError("More than one GameManager instance detected!");
         }
         Instance = this;
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    private void TriggerOnGameStartedRpc() 
+    {
+        OnGameStarted?.Invoke(this,EventArgs.Empty);
     }
     [Rpc(SendTo.Server)]
     public void ClickedOnGridPositionRpc(int x, int y,PlayerType playerType) 
@@ -68,11 +85,23 @@ public class GameManager : NetworkBehaviour
             case PlayerType.Circle:
                 currentPlayablePlayerType = PlayerType.Cross;
                 break;
-        }  
+        }
+        TriggerOnCurrentPlayablePlayerTypeChangeRpc();
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    private void TriggerOnCurrentPlayablePlayerTypeChangeRpc() 
+    {
+        OnCurrentPlayablePlayerTypeChange?.Invoke(this,EventArgs.Empty);
     }
 
     public PlayerType GetLocalPlayerType() 
     {
         return localPlayerType;    
+    }
+
+    public PlayerType GetCurrentPlayablePlayerType()
+    {
+        return currentPlayablePlayerType;
     }
 }
