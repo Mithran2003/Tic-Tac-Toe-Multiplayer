@@ -39,6 +39,6 @@ public class GameVisualManager : NetworkBehaviour
 
     private Vector2 GetGridWorldPosition(int x,int y)
     {
-        return new Vector2(x*GRID_SIZE,y*GRID_SIZE);
+        return new Vector2(-GRID_SIZE+x*GRID_SIZE,-GRID_SIZE+y*GRID_SIZE);
     }
 }

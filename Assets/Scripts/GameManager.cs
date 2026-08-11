@@ -25,6 +25,7 @@ public class GameManager : NetworkBehaviour
 
     private PlayerType localPlayerType;
     private NetworkVariable<PlayerType> currentPlayablePlayerType = new NetworkVariable<PlayerType>();
+    private PlayerType[,] playerTypesArray;
 
     public override void OnNetworkSpawn()
     {
@@ -60,6 +61,7 @@ public class GameManager : NetworkBehaviour
             Debug.LogError("More than one GameManager instance detected!");
         }
         Instance = this;
+        playerTypesArray = new PlayerType[3,3];
     }
 
     [Rpc(SendTo.ClientsAndHost)]
@@ -74,6 +76,14 @@ public class GameManager : NetworkBehaviour
         if(playerType !=currentPlayablePlayerType.Value)
         {
             return;
+        }
+        if(playerTypesArray[x,y]!=PlayerType.None)
+        {
+            return;
+        }
+        else
+        {
+            playerTypesArray[x,y] = playerType;
         }
         OnClickedOnGridPosition?.Invoke(this,new OnClickOnGridPositionEventArgs{x=x,y=y,playerType=playerType});  
 
