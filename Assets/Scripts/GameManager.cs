@@ -13,7 +13,9 @@ public class GameManager : NetworkBehaviour
     public class OnGameWinEventArgs : EventArgs
     {
         public Line line;
+        public PlayerType winPlayerType;
     }
+    public event EventHandler OnRematch;
     public event EventHandler OnCurrentPlayablePlayerTypeChange;
     public event EventHandler<OnClickOnGridPositionEventArgs> OnClickedOnGridPosition;
     public class OnClickOnGridPositionEventArgs: EventArgs
@@ -203,17 +205,45 @@ public class GameManager : NetworkBehaviour
 
     private void TestWinner() 
     {
-        foreach (Line line in linesList)
+        for (int i=0;i<linesList.Count;i++)
         {
+            Line line = linesList[i];
             if(TestWinnerLine(line))
             {
                 //winner!
                 Debug.Log("Winner,Game Over!");
                 currentPlayablePlayerType.Value = PlayerType.None;
-                OnGameWin?.Invoke(this,new OnGameWinEventArgs{line=line});
+                TriggerOnGameWinRpc(i,playerTypesArray[line.centerGridPosition.x,line.centerGridPosition.y]);
                 break;
             }
         }
         
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    private void TriggerOnGameWinRpc(int lineIndex,PlayerType winPlayerType) 
+    {
+        Line line=linesList[lineIndex];
+        OnGameWin?.Invoke(this,new OnGameWinEventArgs{line=line,winPlayerType=winPlayerType});
+    }
+
+    [Rpc(SendTo.Server)]
+    public void RematchRpc() 
+    {
+        for(int x = 0; x < playerTypesArray.GetLength(0); x++) 
+        {
+            for(int y = 0; y <playerTypesArray.GetLength(0) ; y++) 
+            {
+                playerTypesArray[x,y]=PlayerType.None;
+            } 
+        }
+        currentPlayablePlayerType.Value=PlayerType.Cross;
+        TriggerOnRematchRpc();
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    private void TriggerOnRematchRpc() 
+    {
+        OnRematch?.Invoke(this,EventArgs.Empty);
     }
 }
