@@ -3040,6 +3040,7 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   CrossPrefabTransform: {fileID: 8979593433646483994, guid: fe89733ba7f966a4888c112b12ab4c13, type: 3}
   CirclePrefabTransform: {fileID: 8979593433646483994, guid: 30edc11da8d69534bba43bd4488b1b1c, type: 3}
+  lineCompletePrefabTransform: {fileID: 6662774898671131490, guid: bde38943c45b0684eaf547770cf6ccf0, type: 3}
 --- !u!4 &2064965430
 Transform:
   m_ObjectHideFlags: 0
