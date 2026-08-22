@@ -17,6 +17,7 @@ public class GameManager : NetworkBehaviour
     }
     public event EventHandler OnGameTied;
     public event EventHandler OnRematch;
+    public event EventHandler OnScoreChanged;
     public event EventHandler OnCurrentPlayablePlayerTypeChange;
     public event EventHandler<OnClickOnGridPositionEventArgs> OnClickedOnGridPosition;
     public class OnClickOnGridPositionEventArgs: EventArgs
@@ -52,6 +53,8 @@ public class GameManager : NetworkBehaviour
     private NetworkVariable<PlayerType> currentPlayablePlayerType = new NetworkVariable<PlayerType>();
     private PlayerType[,] playerTypesArray;
     private List<Line> linesList;
+    private NetworkVariable<int> playerCrossScore= new NetworkVariable<int>();
+    private NetworkVariable<int> playerCircleScore = new NetworkVariable<int>();
 
     public override void OnNetworkSpawn()
     {
@@ -69,6 +72,15 @@ public class GameManager : NetworkBehaviour
             NetworkManager.Singleton.OnClientConnectedCallback+= NetworkManager_OnClientConnectCallback;
         }
         currentPlayablePlayerType.OnValueChanged+=(PlayerType oldPlayerType,PlayerType newPlayerType)=>{OnCurrentPlayablePlayerTypeChange?.Invoke(this,EventArgs.Empty);};
+
+        playerCrossScore.OnValueChanged+=(int prevScore,int newScore)=>
+        {
+            OnScoreChanged?.Invoke(this,EventArgs.Empty);
+        };
+        playerCircleScore.OnValueChanged+=(int prevScore,int newScore)=>
+        {
+            OnScoreChanged?.Invoke(this,EventArgs.Empty);
+        };
     }
 
     private void NetworkManager_OnClientConnectCallback(ulong obj) 
@@ -214,8 +226,19 @@ public class GameManager : NetworkBehaviour
                 //winner!
                 Debug.Log("Winner,Game Over!");
                 currentPlayablePlayerType.Value = PlayerType.None;
-                TriggerOnGameWinRpc(i,playerTypesArray[line.centerGridPosition.x,line.centerGridPosition.y]);
-                return;
+                PlayerType winPlayerType=playerTypesArray[line.centerGridPosition.x,line.centerGridPosition.y];
+                
+                switch(winPlayerType)
+                {
+                    case PlayerType.Cross:
+                        playerCrossScore.Value++;
+                        break;
+                    case PlayerType.Circle:
+                        playerCircleScore.Value++;
+                        break;  
+                }
+                TriggerOnGameWinRpc(i,winPlayerType);
+                break;
             }
         }
         bool hasTie = true;
@@ -268,5 +291,11 @@ public class GameManager : NetworkBehaviour
     private void TriggerOnRematchRpc() 
     {
         OnRematch?.Invoke(this,EventArgs.Empty);
+    }
+
+    public void GetScore(out int playerCrossScore,out int playerCircleScore) 
+    {
+        playerCircleScore=this.playerCircleScore.Value;
+        playerCrossScore=this.playerCrossScore.Value;    
     }
 }
