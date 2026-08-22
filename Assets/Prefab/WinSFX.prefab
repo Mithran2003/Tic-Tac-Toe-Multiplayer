@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 1964381548718286358}
   - component: {fileID: 1777347321434526255}
   m_Layer: 0
-  m_Name: PlaceSFX
+  m_Name: WinSFX
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -43,7 +43,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 8300000, guid: 3cbd76f6d40e48c48aa47564cd88186b, type: 3}
+  m_Resource: {fileID: 8300000, guid: 6807edc9109b3114e8e1b0f44d202684, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 0.7
   m_Pitch: 1
