@@ -18,6 +18,7 @@ public class GameManager : NetworkBehaviour
     public event EventHandler OnGameTied;
     public event EventHandler OnRematch;
     public event EventHandler OnScoreChanged;
+    public event EventHandler OnPlacedObject;
     public event EventHandler OnCurrentPlayablePlayerTypeChange;
     public event EventHandler<OnClickOnGridPositionEventArgs> OnClickedOnGridPosition;
     public class OnClickOnGridPositionEventArgs: EventArgs
@@ -176,6 +177,7 @@ public class GameManager : NetworkBehaviour
         else
         {
             playerTypesArray[x,y] = playerType;
+            TriggerOnPlacedObjectRpc();
         }
         OnClickedOnGridPosition?.Invoke(this,new OnClickOnGridPositionEventArgs{x=x,y=y,playerType=playerType});  
 
@@ -297,5 +299,11 @@ public class GameManager : NetworkBehaviour
     {
         playerCircleScore=this.playerCircleScore.Value;
         playerCrossScore=this.playerCrossScore.Value;    
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    private void TriggerOnPlacedObjectRpc() 
+    {
+        OnPlacedObject?.Invoke(this,EventArgs.Empty);
     }
 }
