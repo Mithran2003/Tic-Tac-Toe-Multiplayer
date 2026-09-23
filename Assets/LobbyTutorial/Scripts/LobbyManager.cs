@@ -1,11 +1,11 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using Unity.Services.Authentication;
 using Unity.Services.Core;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class LobbyManager : MonoBehaviour {
 
@@ -13,9 +13,16 @@ public class LobbyManager : MonoBehaviour {
     public static LobbyManager Instance { get; private set; }
 
 
+    public static bool IsHost { get; private set; }
+    public static string RelayJoinCode { get; private set; }
+
+
+
     public const string KEY_PLAYER_NAME = "PlayerName";
     public const string KEY_PLAYER_CHARACTER = "Character";
     public const string KEY_GAME_MODE = "GameMode";
+    public const string KEY_START_GAME = "StartGame";
+    public const string KEY_RELAY_JOIN_CODE = "RelayJoinCode";
 
 
 
@@ -25,6 +32,7 @@ public class LobbyManager : MonoBehaviour {
     public event EventHandler<LobbyEventArgs> OnJoinedLobbyUpdate;
     public event EventHandler<LobbyEventArgs> OnKickedFromLobby;
     public event EventHandler<LobbyEventArgs> OnLobbyGameModeChanged;
+    public event EventHandler<LobbyEventArgs> OnLobbyStartGame;
     public class LobbyEventArgs : EventArgs {
         public Lobby lobby;
     }
@@ -36,7 +44,8 @@ public class LobbyManager : MonoBehaviour {
 
 
     public enum GameMode {
-        TicTacToe
+        CaptureTheFlag,
+        Conquest
     }
 
     public enum PlayerCharacter {
@@ -52,6 +61,7 @@ public class LobbyManager : MonoBehaviour {
     private float refreshLobbyListTimer = 5f;
     private Lobby joinedLobby;
     private string playerName;
+    private bool alreadyStartedGame;
 
 
     private void Awake() {
@@ -59,12 +69,13 @@ public class LobbyManager : MonoBehaviour {
     }
 
     private void Update() {
-        HandleRefreshLobbyList(); // Disabled Auto Refresh for testing with multiple builds
+        //HandleRefreshLobbyList(); // Disabled Auto Refresh for testing with multiple builds
         HandleLobbyHeartbeat();
         HandleLobbyPolling();
     }
 
     public async void Authenticate(string playerName) {
+        playerName = playerName.Replace(" ", "_");
         this.playerName = playerName;
         InitializationOptions initializationOptions = new InitializationOptions();
         initializationOptions.SetProfile(playerName);
@@ -117,6 +128,22 @@ public class LobbyManager : MonoBehaviour {
 
                 OnJoinedLobbyUpdate?.Invoke(this, new LobbyEventArgs { lobby = joinedLobby });
 
+                if (!IsLobbyHost()) {
+                    if (joinedLobby.Data[KEY_RELAY_JOIN_CODE].Value != "") {
+                        JoinGame(joinedLobby.Data[KEY_RELAY_JOIN_CODE].Value);
+                    }
+                }
+
+                if (!alreadyStartedGame) {
+                    if (IsLobbyHost()) {
+                        if (joinedLobby.Players.Count == 2) {
+                            // Two players have joined, start game
+                            StartGame();
+                        }
+                    }
+                }
+
+
                 if (!IsPlayerInLobby()) {
                     // Player was kicked out of this lobby
                     Debug.Log("Kicked from Lobby!");
@@ -156,7 +183,7 @@ public class LobbyManager : MonoBehaviour {
         });
     }
 
-    /*public void ChangeGameMode() {
+    public void ChangeGameMode() {
         if (IsLobbyHost()) {
             GameMode gameMode =
                 Enum.Parse<GameMode>(joinedLobby.Data[KEY_GAME_MODE].Value);
@@ -173,7 +200,7 @@ public class LobbyManager : MonoBehaviour {
 
             UpdateLobbyGameMode(gameMode);
         }
-    }*/
+    }
 
     public async void CreateLobby(string lobbyName, int maxPlayers, bool isPrivate, GameMode gameMode) {
         Player player = GetPlayer();
@@ -182,7 +209,8 @@ public class LobbyManager : MonoBehaviour {
             Player = player,
             IsPrivate = isPrivate,
             Data = new Dictionary<string, DataObject> {
-                { KEY_GAME_MODE, new DataObject(DataObject.VisibilityOptions.Public, gameMode.ToString()) }
+                { KEY_GAME_MODE, new DataObject(DataObject.VisibilityOptions.Public, gameMode.ToString()) },
+                { KEY_RELAY_JOIN_CODE, new DataObject(DataObject.VisibilityOptions.Member, "") }
             }
         };
 
@@ -351,5 +379,58 @@ public class LobbyManager : MonoBehaviour {
             Debug.Log(e);
         }
     }
+
+    public async void StartGame() {
+        try {
+            Debug.Log("StartGame");
+
+            Lobby lobby = await LobbyService.Instance.UpdateLobbyAsync(joinedLobby.Id, new UpdateLobbyOptions {
+                Data = new Dictionary<string, DataObject> {
+                    { KEY_START_GAME, new DataObject(DataObject.VisibilityOptions.Public, "1") }
+                }
+            });
+
+            joinedLobby = lobby;
+
+            IsHost = true;
+            alreadyStartedGame = true;
+            SceneManager.LoadScene(1);
+
+            OnLobbyStartGame?.Invoke(this, new LobbyEventArgs { lobby = joinedLobby });
+        } catch (LobbyServiceException e) {
+            Debug.Log(e);
+        }
+    }
+
+    private void JoinGame(string relayJoinCode) {
+        Debug.Log("JoinGame " + relayJoinCode);
+        if (string.IsNullOrEmpty(relayJoinCode)) {
+            Debug.Log("Invalid Relay code, wait");
+            return;
+        }
+
+        IsHost = false;
+        RelayJoinCode = relayJoinCode;
+        SceneManager.LoadScene(1);
+        alreadyStartedGame = true;
+        OnLobbyStartGame?.Invoke(this, new LobbyEventArgs { lobby = joinedLobby });
+    }
+
+    public async void SetRelayJoinCode(string relayJoinCode) {
+        try {
+            Debug.Log("SetRelayJoinCode " + relayJoinCode);
+
+            Lobby lobby = await LobbyService.Instance.UpdateLobbyAsync(joinedLobby.Id, new UpdateLobbyOptions {
+                Data = new Dictionary<string, DataObject> {
+                    { KEY_RELAY_JOIN_CODE, new DataObject(DataObject.VisibilityOptions.Member, relayJoinCode) }
+                }
+            });
+
+            joinedLobby = lobby;
+        } catch (LobbyServiceException e) {
+            Debug.Log(e);
+        }
+    }
+
 
 }
