@@ -66,7 +66,7 @@ public class LobbyCreateUI : MonoBehaviour {
             });
         });
 
-        gameModeButton.onClick.AddListener(() => {
+        /*gameModeButton.onClick.AddListener(() => {
             switch (gameMode) {
                 default:
                 case LobbyManager.GameMode.CaptureTheFlag:
@@ -77,7 +77,7 @@ public class LobbyCreateUI : MonoBehaviour {
                     break;
             }
             UpdateText();
-        });
+        });*/
 
         Hide();
     }
@@ -98,8 +98,8 @@ public class LobbyCreateUI : MonoBehaviour {
 
         lobbyName = "MyLobby";
         isPrivate = false;
-        maxPlayers = 4;
-        gameMode = LobbyManager.GameMode.CaptureTheFlag;
+        maxPlayers = 2;
+        gameMode = LobbyManager.GameMode.TicTacToe;
 
         UpdateText();
     }

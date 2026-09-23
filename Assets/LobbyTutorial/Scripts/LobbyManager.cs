@@ -36,8 +36,7 @@ public class LobbyManager : MonoBehaviour {
 
 
     public enum GameMode {
-        CaptureTheFlag,
-        Conquest
+        TicTacToe
     }
 
     public enum PlayerCharacter {
@@ -157,7 +156,7 @@ public class LobbyManager : MonoBehaviour {
         });
     }
 
-    public void ChangeGameMode() {
+    /*public void ChangeGameMode() {
         if (IsLobbyHost()) {
             GameMode gameMode =
                 Enum.Parse<GameMode>(joinedLobby.Data[KEY_GAME_MODE].Value);
@@ -174,7 +173,7 @@ public class LobbyManager : MonoBehaviour {
 
             UpdateLobbyGameMode(gameMode);
         }
-    }
+    }*/
 
     public async void CreateLobby(string lobbyName, int maxPlayers, bool isPrivate, GameMode gameMode) {
         Player player = GetPlayer();
