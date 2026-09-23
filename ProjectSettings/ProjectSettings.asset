@@ -794,8 +794,8 @@ PlayerSettings:
   editorAssembliesCompatibilityLevel: 1
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
-  metroPackageName: Tic Tac Toe Multiplayer
-  metroPackageVersion: 
+  metroPackageName: TicTacToeMultiplayer
+  metroPackageVersion: 1.0.0.0
   metroCertificatePath: 
   metroCertificatePassword: 
   metroCertificateSubject: 
@@ -803,7 +803,7 @@ PlayerSettings:
   metroCertificateNotAfter: 0000000000000000
   metroApplicationDescription: Tic Tac Toe Multiplayer
   wsaImages: {}
-  metroTileShortName: 
+  metroTileShortName: Tic Tac Toe Multiplayer
   metroTileShowName: 0
   metroMediumTileShowName: 0
   metroLargeTileShowName: 0
