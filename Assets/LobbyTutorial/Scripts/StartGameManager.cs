@@ -54,7 +54,7 @@ public class StartGameManager : MonoBehaviour {
         try {
             JoinAllocation joinAllocation = await RelayService.Instance.JoinAllocationAsync(joinCode);
 
-            RelayServerData relayServerData = new RelayServerData(joinAllocation.RelayServer.IpV4,(ushort)joinAllocation.RelayServer.Port,joinAllocation.AllocationIdBytes,joinAllocation.ConnectionData,joinAllocation.ConnectionData,joinAllocation.Key,true);
+            RelayServerData relayServerData = new RelayServerData(joinAllocation.RelayServer.IpV4,(ushort)joinAllocation.RelayServer.Port,joinAllocation.AllocationIdBytes,joinAllocation.ConnectionData,joinAllocation.HostConnectionData,joinAllocation.Key,true);
 
             NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
 
