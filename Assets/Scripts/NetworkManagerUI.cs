@@ -4,6 +4,7 @@ using Unity.Networking.Transport.Relay;
 using UnityEngine;
 using UnityEngine.UI;
 using System;
+using Unity.Services.Relay;
 
 public class NetworkManagerUI : MonoBehaviour
 {
@@ -15,10 +16,18 @@ public class NetworkManagerUI : MonoBehaviour
 
     private void Awake()
     {
-        StartHostButton.onClick.AddListener(()=>{NetworkRelay.Instance.StartHost();
+        StartHostButton.onClick.AddListener(()=>{try {NetworkRelay.Instance.StartHost();}
+        catch(RelayServiceException e)
+            {
+                Debug.Log(e);
+            }
         Hide();
         });
-        StartClientButton.onClick.AddListener(()=>{NetworkRelay.Instance.joinRelay(JoinCodeField.text);
+        StartClientButton.onClick.AddListener(()=>{try{NetworkRelay.Instance.joinRelay(JoinCodeField.text);}
+        catch
+            {
+                Debug.Log("Something went Wrong!!!");
+            }
         Hide();
         UpdateJoinCode();
         });
