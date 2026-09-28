@@ -32,7 +32,7 @@ public class NetworkRelay : MonoBehaviour
         try
         {
             Allocation allocation = await RelayService.Instance.CreateAllocationAsync(maxConnections);
-            NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(new RelayServerData(allocation.RelayServer.IpV4,(ushort)allocation.RelayServer.Port,allocation.AllocationIdBytes,allocation.ConnectionData,allocation.ConnectionData,allocation.Key,true,true));
+            NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(new RelayServerData(allocation.RelayServer.IpV4,(ushort)allocation.RelayServer.Port,allocation.AllocationIdBytes,allocation.ConnectionData,allocation.ConnectionData,allocation.Key,false,true));
             string joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
             return NetworkManager.Singleton.StartHost()?joinCode:null;
         }
@@ -64,7 +64,7 @@ public class NetworkRelay : MonoBehaviour
         try
         {
              JoinAllocation joinAllocation = await RelayService.Instance.JoinAllocationAsync(joinCode);
-            NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(new RelayServerData(joinAllocation.RelayServer.IpV4,(ushort)joinAllocation.RelayServer.Port,joinAllocation.AllocationIdBytes,joinAllocation.ConnectionData,joinAllocation.ConnectionData,joinAllocation.Key,true,true));
+            NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(new RelayServerData(joinAllocation.RelayServer.IpV4,(ushort)joinAllocation.RelayServer.Port,joinAllocation.AllocationIdBytes,joinAllocation.ConnectionData,joinAllocation.ConnectionData,joinAllocation.Key,false,true));
             return !string.IsNullOrEmpty(joinCode)&& NetworkManager.Singleton.StartClient();
         }
         catch(RelayServiceException e)
