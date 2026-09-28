@@ -23,7 +23,7 @@ public class NetworkManagerUI : MonoBehaviour
             }
         Hide();
         });
-        StartClientButton.onClick.AddListener(()=>{try{NetworkRelay.Instance.joinRelay(JoinCodeField.text);}
+        StartClientButton.onClick.AddListener(()=>{try{if(JoinCodeField.text!= null)NetworkRelay.Instance.joinRelay(JoinCodeField.text);}
         catch
             {
                 Debug.Log("Something went Wrong!!!");

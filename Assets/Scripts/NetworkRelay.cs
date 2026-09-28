@@ -47,7 +47,6 @@ public class NetworkRelay : MonoBehaviour
     public  async void StartHost()
     {
         joinCode = await StartHostRelay();
-        Debug.Log(joinCode);
     }
 
     public async void joinRelay(string joinCode)
